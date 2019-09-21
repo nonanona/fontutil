@@ -1,0 +1,2 @@
+include ':demo', ':lib'
+rootProject.name='fontutil'
