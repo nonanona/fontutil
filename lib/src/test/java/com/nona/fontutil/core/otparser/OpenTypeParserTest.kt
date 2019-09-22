@@ -96,4 +96,29 @@ class OpenTypeParserTest {
             assertThat(name).isEqualTo(nameRecord)
         }
     }
+
+    @Test
+    fun `parce name (TTC)`() {
+        val fontFile = TestUtil.getThirdPartyFile("noto-cjk/NotoSerifCJK-Regular.ttc")
+
+        assertWithMessage("File must exists: ${fontFile.absolutePath}")
+            .that(fontFile.exists())
+            .isTrue()
+
+        val buffer = IOUtil.mmap(fontFile)
+        assertThat(OpenTypeParser(buffer).parseName())
+            .isEqualTo(NameRecord("Noto Serif CJK JP", "Regular"))
+
+        assertThat(OpenTypeParser(buffer, 0).parseName())
+            .isEqualTo(NameRecord("Noto Serif CJK JP", "Regular"))
+
+        assertThat(OpenTypeParser(buffer, 1).parseName())
+            .isEqualTo(NameRecord("Noto Serif CJK KR", "Regular"))
+
+        assertThat(OpenTypeParser(buffer, 2).parseName())
+            .isEqualTo(NameRecord("Noto Serif CJK SC", "Regular"))
+
+        assertThat(OpenTypeParser(buffer, 3).parseName())
+            .isEqualTo(NameRecord("Noto Serif CJK TC", "Regular"))
+    }
 }

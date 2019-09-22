@@ -28,18 +28,35 @@ private fun ByteBuffer.position(i: Long) = position(i.toInt())
 private const val SFNT_VERSION_1_0 = 0x0001_0000L
 private const val SFNT_TAG_OTTO = 0x4F_54_54_4FL
 
+private const val TAG_ttcf = 0x74_74_63_66L
 private const val TAG_OS_2 = 0x4F_53_2F_32L
 private const val TAG_cmap = 0x63_6D_61_70L
 private const val TAG_name = 0x6E_61_6D_65L
 
-class OpenTypeParser(fontBuffer: ByteBuffer) {
+class OpenTypeParser(fontBuffer: ByteBuffer, val index: Int = 0) {
 
 
     private val fontBuffer = fontBuffer.slice().apply { order(ByteOrder.BIG_ENDIAN) }
 
-    private fun getTableOffset(tableTag: Long): Int {
-        fontBuffer.position(0)
+    private fun getTableOffset(tableTag: Long, bufferOffset:Int = 0): Int {
+        fontBuffer.position(bufferOffset)
         val sfntVersion = fontBuffer.uint32()
+
+        if (sfntVersion == TAG_ttcf) {
+            // The given file is TTC, read specified index.
+            fontBuffer.uint16()  // ignore majorVersion
+            fontBuffer.uint16()  // ignore minorVersion
+            val numFonts = fontBuffer.uint32()
+
+            for (i in 0 until numFonts) {
+                val fontBufferOffset = fontBuffer.uint32()
+                if (i.toInt() == index) {
+                    return getTableOffset(tableTag, fontBufferOffset.toInt())
+                }
+            }
+            return -1
+        }
+
         if (sfntVersion != SFNT_TAG_OTTO && sfntVersion != SFNT_VERSION_1_0) {
             throw IOException("sfntVersion is invalid ${sfntVersion}")
         }
