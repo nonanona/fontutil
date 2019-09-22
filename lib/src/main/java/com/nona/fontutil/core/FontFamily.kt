@@ -16,15 +16,15 @@ data class FontFamily private constructor(
         }
 
         fun build(): FontFamily {
+            if (fonts.isEmpty()) {
+                throw IllegalArgumentException("Font must contains at least one font")
+            }
+
             return FontFamily(
                 fonts,
-                name ?: ""
+                name ?: fonts[0].nameRecord.familyName
             )
         }
-    }
-
-    init {
-        if (fonts.isEmpty()) throw IllegalArgumentException("Font must contains at least one font")
     }
 
     // cmap coverage is likely to be used in UI thread, so compute it when it is created.

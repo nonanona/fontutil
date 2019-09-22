@@ -18,6 +18,7 @@ class FontFamilyTest {
         val family = FontFamily.Builder(arrayOf(font)).build()
         Truth.assertThat(family).isNotNull()
         Truth.assertThat('a'.toInt() in family).isTrue()
+        Truth.assertThat(family.name).isEqualTo("Roboto")
     }
 
     @Test
@@ -28,6 +29,7 @@ class FontFamilyTest {
         val family = FontFamily.Builder(arrayOf(font1, font2)).build()
         Truth.assertThat(family).isNotNull()
         Truth.assertThat('a'.toInt() in family).isTrue()
+        Truth.assertThat(family.name).isEqualTo("Roboto")
     }
 
     @Test
@@ -35,9 +37,9 @@ class FontFamilyTest {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val font = Font.Builder(context.assets, "fonts/Roboto-Regular.ttf").build()
         val family = FontFamily.Builder(arrayOf(font))
-            .setName("Roboto")
+            .setName("Roboto Custom")
             .build()
         Truth.assertThat(family).isNotNull()
-        Truth.assertThat(family.name).isEqualTo("Roboto")
+        Truth.assertThat(family.name).isEqualTo("Roboto Custom")
     }
 }

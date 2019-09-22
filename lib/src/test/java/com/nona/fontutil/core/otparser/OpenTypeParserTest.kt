@@ -9,7 +9,7 @@ import org.junit.Test
 private const val ROBOTO_DIR_PREFIX = "roboto-fonts"
 
 class OpenTypeParserTest {
-    val robotoFonts = mapOf(
+    val robotoFontsStyles = mapOf(
         "Roboto-Thin.ttf" to FontStyle(250, false),
         "Roboto-ThinItalic.ttf" to FontStyle(250, true),
         "Roboto-Light.ttf" to FontStyle(300, false),
@@ -24,9 +24,24 @@ class OpenTypeParserTest {
         "Roboto-Black.ttf" to FontStyle(900, false)
     )
 
+    val robotoFontsNames = mapOf(
+        "Roboto-Thin.ttf" to NameRecord("Roboto", "Thin"),
+        "Roboto-ThinItalic.ttf" to NameRecord("Roboto", "Thin Italic"),
+        "Roboto-Light.ttf" to NameRecord("Roboto", "Light"),
+        "Roboto-LightItalic.ttf" to NameRecord("Roboto", "Light Italic"),
+        "Roboto-Regular.ttf" to NameRecord("Roboto", "Regular"),
+        "Roboto-RegularItalic.ttf" to NameRecord("Roboto", "Italic"),
+        "Roboto-Medium.ttf" to NameRecord("Roboto", "Medium"),
+        "Roboto-MediumItalic.ttf" to NameRecord("Roboto", "Medium Italic"),
+        "Roboto-Bold.ttf" to NameRecord("Roboto", "Bold"),
+        "Roboto-BoldItalic.ttf" to NameRecord("Roboto", "Bold Italic"),
+        "Roboto-Black.ttf" to NameRecord("Roboto", "Black"),
+        "Roboto-BlackItalic.ttf" to NameRecord("Roboto", "Black Italic")
+        )
+
     @Test
     fun `parse style`() {
-        robotoFonts.forEach { (fileName, expectStyle) ->
+        robotoFontsStyles.forEach { (fileName, expectStyle) ->
             val fontFile = TestUtil.getThirdPartyFile("$ROBOTO_DIR_PREFIX/$fileName")
 
             assertWithMessage("File must exists: ${fontFile.absolutePath}")
@@ -64,5 +79,21 @@ class OpenTypeParserTest {
             }
         }
 
+    }
+
+    @Test
+    fun `parse name`() {
+        robotoFontsNames.forEach { (fileName, nameRecord) ->
+            val fontFile = TestUtil.getThirdPartyFile("$ROBOTO_DIR_PREFIX/$fileName")
+
+            assertWithMessage("File must exists: ${fontFile.absolutePath}")
+                .that(fontFile.exists())
+                .isTrue()
+
+            val buffer = IOUtil.mmap(fontFile)
+
+            val name = OpenTypeParser(buffer).parseName()
+            assertThat(name).isEqualTo(nameRecord)
+        }
     }
 }

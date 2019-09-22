@@ -6,8 +6,7 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
 data class FontStyle(val weight: Int, val italic: Boolean)
-
-private data class FontTable(val tag: Long, val offset: Int, val length: Int)
+data class NameRecord(val familyName: String, val subFamilyName: String)
 
 private fun ByteBuffer.uint32(): Long = int.toLong() and 0xFFFF_FFFFL
 private fun ByteBuffer.int32(): Int = int
@@ -31,8 +30,10 @@ private const val SFNT_TAG_OTTO = 0x4F_54_54_4FL
 
 private const val TAG_OS_2 = 0x4F_53_2F_32L
 private const val TAG_cmap = 0x63_6D_61_70L
+private const val TAG_name = 0x6E_61_6D_65L
 
 class OpenTypeParser(fontBuffer: ByteBuffer) {
+
 
     private val fontBuffer = fontBuffer.slice().apply { order(ByteOrder.BIG_ENDIAN) }
 
@@ -140,5 +141,77 @@ class OpenTypeParser(fontBuffer: ByteBuffer) {
         } else {
             throw RuntimeException("Cmap format 4 or format 12 is expected.")
         }
+    }
+
+    private fun isSupportEncoding(platformId: Int, encodingId: Int, languageId: Int): Boolean {
+        if (platformId == 3) {  // Windows
+            if (encodingId == 1) {  // Unicode BMP
+                if (languageId == 0x409) { // en-US
+                    return true
+                }
+            }
+        }
+        return false
+    }
+
+    fun parseName(): NameRecord {
+        val nameOffset = getTableOffset(TAG_name)
+        if (nameOffset == -1) return NameRecord("", "")
+        fontBuffer.position(nameOffset)
+
+        fontBuffer.uint16()  // ignore format
+        val count = fontBuffer.uint16()
+        val stringOffset = fontBuffer.uint16()
+
+        var familyNameOffset = -1
+        var familyNameLength = -1
+        var subFamilyNameOffset = -1
+        var subFamilyNameLength = -1
+
+        for (i in 0 until count) {  // Reading NameRecord
+            val platformId = fontBuffer.uint16()
+            val encodingId = fontBuffer.uint16()
+            val languageId = fontBuffer.uint16()
+            val nameId = fontBuffer.uint16()
+            val length = fontBuffer.uint16()
+            val offset = fontBuffer.uint16()
+
+            if (!isSupportEncoding(platformId, encodingId, languageId)) continue
+
+            // We prefer Typographic Family name (nameID = 16) over legacy Family Name (nameID = 1)
+            when (nameId) {
+                1 -> if (familyNameOffset == -1) {
+                    familyNameOffset = offset
+                    familyNameLength = length
+                }
+                2 -> if (subFamilyNameOffset == -1) {
+                    subFamilyNameOffset = offset
+                    subFamilyNameLength = length
+                }
+                16 -> {
+                    familyNameOffset = offset
+                    familyNameLength = length
+                }
+                17 -> {
+                    subFamilyNameOffset = offset
+                    subFamilyNameLength = length
+                }
+            }
+        }
+
+        // The String is encoded in UTF-16BE.
+        val familyNameChars = CharArray(familyNameLength / 2)
+        for (j in 0 until familyNameChars.size) {
+            familyNameChars[j] = fontBuffer.getChar(
+                nameOffset + stringOffset + familyNameOffset + j * 2)
+        }
+
+        val subFamilyChars = CharArray(subFamilyNameLength / 2)
+        for (j in 0 until subFamilyChars.size) {
+            subFamilyChars[j] = fontBuffer.getChar(
+                nameOffset + stringOffset + subFamilyNameOffset + j * 2)
+        }
+
+        return NameRecord(String(familyNameChars), String(subFamilyChars))
     }
 }

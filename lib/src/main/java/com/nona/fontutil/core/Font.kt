@@ -11,6 +11,7 @@ import com.nona.fontutil.base.FileUtil
 import com.nona.fontutil.base.IOUtil
 import com.nona.fontutil.base.SparseBitSet
 import com.nona.fontutil.core.otparser.FontStyle
+import com.nona.fontutil.core.otparser.NameRecord
 import com.nona.fontutil.core.otparser.OpenTypeParser
 import java.io.IOException
 import java.nio.ByteBuffer
@@ -57,6 +58,8 @@ data class Font private constructor(
     }
 
     val cmapCoverage: SparseBitSet by lazy { OpenTypeParser(fontBuffer).parseCoverage() }
+
+    val nameRecord: NameRecord by lazy { OpenTypeParser(fontBuffer).parseName() }
 
     operator fun contains(codePoint: Int): Boolean = codePoint in cmapCoverage
 }
