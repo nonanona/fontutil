@@ -22,6 +22,19 @@ android {
         }
     }
 
+    sourceSets {
+        androidTest {
+            assets.srcDirs = ['src/androidTest/assets/']
+            res.srcDirs = ['src/androidTest/res']
+        }
+    }
+
+    // For androidTest only.
+    // TODO: Narrow down to test only target
+    aaptOptions {
+        noCompress 'ttf', 'otf', 'ttc', 'otc'
+        ignoreAssetsPattern '*.txt'
+    }
 }
 
 dependencies {
@@ -34,6 +47,8 @@ dependencies {
     testImplementation 'androidx.test:core:1.0.0'
     testImplementation 'org.mockito:mockito-core:1.10.19'
 
+    androidTestImplementation 'com.google.truth:truth:0.43'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 }
