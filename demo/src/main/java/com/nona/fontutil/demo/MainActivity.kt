@@ -34,8 +34,7 @@ class MainActivity : AppCompatActivity() {
             R.font.roboto_thin_italic
         ).forEach {
             val buffer = IOUtil.mmap(resources, it)
-            val style = OpenTypeParser(buffer).parseStyle()
-            android.util.Log.e("MainActivity", "  Style: $style")
+            OpenTypeParser(buffer).parseCoverage()
         }
 
     }

@@ -45,4 +45,12 @@ class SparseBitSetTest {
                 .isEqualTo(i in dataInSet)
         }
     }
+
+    @Test
+    fun `empty build`() {
+        val sbs = SparseBitSet.Builder().build()
+        for (i in 0 .. 100) {
+            assertThat(i in sbs).isFalse()
+        }
+    }
 }

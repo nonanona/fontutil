@@ -41,6 +41,7 @@ class SparseBitSet private constructor(
             return this
         }
 
+        fun append(start: Long, end: Long) : Builder = append(start.toInt(), end.toInt())
         fun append(index: Int) : Builder = append(index, index + 1)
 
         /**
@@ -114,9 +115,8 @@ class SparseBitSet private constructor(
                 = (end - (start and 0x7FFF_FFE0) + 0x1F) shr 5
 
         fun build(): SparseBitSet {
-            if (ends.last() > MAX_CAPACITY) {
-                throw RuntimeException("The maximum capacity exceeded.")
-            }
+            if (ends.isEmpty()) return SparseBitSet(intArrayOf(), intArrayOf(), 0)
+            if (ends.last() > MAX_CAPACITY) throw RuntimeException("The maximum capacity exceeded.")
 
             val indicies = IntArray(numOfIndices())
             val bitmaps = IntArray(numOfSlots() * 0x08)
@@ -139,7 +139,7 @@ class SparseBitSet private constructor(
                             zeroSlot = currentSlot++
                         }
                         for (j in nonZeroPageEnd until startPage) {
-                            indicies[zeroSlot]
+                            indicies[j] = zeroSlot
                         }
                     }
                     indicies[startPage] = currentSlot++
