@@ -9,12 +9,13 @@ import android.os.Build
 import androidx.annotation.FontRes
 import com.nona.fontutil.base.FileUtil
 import com.nona.fontutil.base.IOUtil
+import com.nona.fontutil.base.SparseBitSet
 import com.nona.fontutil.core.otparser.FontStyle
 import com.nona.fontutil.core.otparser.OpenTypeParser
 import java.io.IOException
 import java.nio.ByteBuffer
 
-data class Font(
+data class Font private constructor(
     val fontBuffer: ByteBuffer,
     val typeface: Typeface,
     val style: FontStyle
@@ -54,4 +55,8 @@ data class Font(
             return Font(fontBuffer, typeface, fontStyle)
         }
     }
+
+    val cmapCoverage: SparseBitSet by lazy { OpenTypeParser(fontBuffer).parseCoverage() }
+
+    operator fun contains(codePoint: Int): Boolean = codePoint in cmapCoverage
 }

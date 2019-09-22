@@ -36,8 +36,8 @@ class OpenTypeParser(fontBuffer: ByteBuffer) {
 
     private val fontBuffer = fontBuffer.slice().apply { order(ByteOrder.BIG_ENDIAN) }
 
-    private val tableMap: Map<Long, FontTable> by lazy(LazyThreadSafetyMode.NONE) {
-        if (fontBuffer.position() != 0) throw IOException("Must parse file header first")
+    private fun getTableOffset(tableTag: Long): Int {
+        fontBuffer.position(0)
         val sfntVersion = fontBuffer.uint32()
         if (sfntVersion != SFNT_TAG_OTTO && sfntVersion != SFNT_VERSION_1_0) {
             throw IOException("sfntVersion is invalid ${sfntVersion}")
@@ -47,26 +47,25 @@ class OpenTypeParser(fontBuffer: ByteBuffer) {
         fontBuffer.uint16()  // ignore entrySelector
         fontBuffer.uint16()  // ignore rangeShift
 
-        val result = mutableMapOf<Long, FontTable>()
-
         for (i in 0 until numTables) {
             val tag = fontBuffer.uint32()
             fontBuffer.uint32()  // ignore checkSum
             val offset = fontBuffer.uint32()
-            val length = fontBuffer.uint32()
+            fontBuffer.uint32()  // ignore length
 
-            result.put(tag, FontTable(tag, offset.toInt(), length.toInt()))
+            if (tableTag == tag) {
+                return offset.toInt()
+            }
         }
-
-        result
+        return -1
     }
 
     fun parseStyle(): FontStyle {
-        val os2Table = tableMap[TAG_OS_2]
-        if (os2Table == null) return FontStyle(400, false)
+        val offset = getTableOffset(TAG_OS_2)
+        if (offset == -1) return FontStyle(400, false)
 
-        val weight = fontBuffer.uint16(os2Table.offset + 4)  // usWeightClass
-        val selection = fontBuffer.uint16(os2Table.offset + 62)  // fsSelection
+        val weight = fontBuffer.uint16(offset + 4)  // usWeightClass
+        val selection = fontBuffer.uint16(offset + 62)  // fsSelection
 
         return FontStyle(weight, (selection and 1) != 0)
     }
@@ -107,8 +106,9 @@ class OpenTypeParser(fontBuffer: ByteBuffer) {
     }
 
     fun parseCoverage(): SparseBitSet {
-        val cmapTable = tableMap[TAG_cmap] ?: return SparseBitSet.Builder().build()
-        fontBuffer.position(cmapTable.offset)
+        val cmapOffset = getTableOffset(TAG_cmap)
+        if (cmapOffset == -1) return SparseBitSet.Builder().build()
+        fontBuffer.position(cmapOffset)
         fontBuffer.uint16()  // ignore version
         val numTables = fontBuffer.uint16()
 
@@ -131,10 +131,10 @@ class OpenTypeParser(fontBuffer: ByteBuffer) {
         // There is no supported cmap table. return empty coverage.
         if (highestScore == Int.MAX_VALUE) return SparseBitSet.Builder().build()
 
-        fontBuffer.position(cmapTable.offset + highestTableOffset)
+        fontBuffer.position(cmapOffset + highestTableOffset)
         var format = fontBuffer.uint16()
         if (format == 12) {
-            return parseCmapFormat12(cmapTable.offset + highestTableOffset)
+            return parseCmapFormat12(cmapOffset + highestTableOffset)
         } else if (format == 4){
             TODO("Format 4 is not yet supported.")
         } else {
