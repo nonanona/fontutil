@@ -3,7 +3,7 @@ package com.nona.fontutil.demo
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.nona.fontutil.core.otparser.OpenTypeParser
-import com.nona.fontutil.core.util.IOUtil
+import com.nona.fontutil.base.IOUtil
 
 class MainActivity : AppCompatActivity() {
 

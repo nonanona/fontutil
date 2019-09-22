@@ -2,7 +2,7 @@ package com.nona.fontutil.core.otparser
 
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
-import com.nona.fontutil.core.util.IOUtil
+import com.nona.fontutil.base.IOUtil
 import com.nona.fontutil.test.TestUtil
 import org.junit.Test
 

@@ -1,4 +1,4 @@
-package com.nona.fontutil.core.util
+package com.nona.fontutil.base
 
 import android.annotation.SuppressLint
 import android.content.res.AssetManager
