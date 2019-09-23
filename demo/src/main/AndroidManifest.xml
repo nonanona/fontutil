@@ -15,6 +15,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        
+        <activity android:name=".systemfonts.SystemFontsLitDumpActivity"
+            android:label="System Fonts/Dump All System Fonts">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.nona.fontutil.demos.SAMPLE_CODE" />
+            </intent-filter>
+        </activity>
 
     </application>
 
