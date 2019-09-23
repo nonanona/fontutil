@@ -153,7 +153,7 @@ class OpenTypeParser(fontBuffer: ByteBuffer, val index: Int = 0) {
         var format = fontBuffer.uint16()
         if (format == 12) {
             return parseCmapFormat12(cmapOffset + highestTableOffset)
-        } else if (format == 4){
+        } else if (format == 4) {
             TODO("Format 4 is not yet supported.")
         } else {
             throw RuntimeException("Cmap format 4 or format 12 is expected.")
@@ -220,13 +220,15 @@ class OpenTypeParser(fontBuffer: ByteBuffer, val index: Int = 0) {
         val familyNameChars = CharArray(familyNameLength / 2)
         for (j in 0 until familyNameChars.size) {
             familyNameChars[j] = fontBuffer.getChar(
-                nameOffset + stringOffset + familyNameOffset + j * 2)
+                nameOffset + stringOffset + familyNameOffset + j * 2
+            )
         }
 
         val subFamilyChars = CharArray(subFamilyNameLength / 2)
         for (j in 0 until subFamilyChars.size) {
             subFamilyChars[j] = fontBuffer.getChar(
-                nameOffset + stringOffset + subFamilyNameOffset + j * 2)
+                nameOffset + stringOffset + subFamilyNameOffset + j * 2
+            )
         }
 
         return NameRecord(String(familyNameChars), String(subFamilyChars))

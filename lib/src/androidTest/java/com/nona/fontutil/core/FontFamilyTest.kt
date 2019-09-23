@@ -14,7 +14,7 @@ class FontFamilyTest {
     @Test
     fun create_from_single() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
-        val font = Font.Builder(context.assets, "fonts/Roboto-Regular.ttf").build()
+        val font = Font.Builder(context.assets, "fonts/roboto-font/Roboto-Regular.ttf").build()
         val family = FontFamily.Builder(arrayOf(font)).build()
         Truth.assertThat(family).isNotNull()
         Truth.assertThat('a'.toInt() in family).isTrue()
@@ -24,7 +24,7 @@ class FontFamilyTest {
     @Test
     fun create_from_multiple() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
-        val font1 = Font.Builder(context.assets, "fonts/Roboto-Regular.ttf").build()
+        val font1 = Font.Builder(context.assets, "fonts/roboto-font/Roboto-Regular.ttf").build()
         val font2 = Font.Builder(context, R.font.roboto_bold).build()
         val family = FontFamily.Builder(arrayOf(font1, font2)).build()
         Truth.assertThat(family).isNotNull()
@@ -35,7 +35,7 @@ class FontFamilyTest {
     @Test
     fun create_with_name() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
-        val font = Font.Builder(context.assets, "fonts/Roboto-Regular.ttf").build()
+        val font = Font.Builder(context.assets, "fonts/roboto-font/Roboto-Regular.ttf").build()
         val family = FontFamily.Builder(arrayOf(font))
             .setName("Roboto Custom")
             .build()
