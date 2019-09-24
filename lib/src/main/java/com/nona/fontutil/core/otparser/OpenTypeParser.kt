@@ -4,23 +4,31 @@ import com.nona.fontutil.base.SparseBitSet
 import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import java.nio.ShortBuffer
 
 data class FontStyle(val weight: Int, val italic: Boolean)
 data class NameRecord(val familyName: String, val subFamilyName: String)
 
-private fun ByteBuffer.uint32(): Long = int.toLong() and 0xFFFF_FFFFL
+private fun Int.toUnsigned(): Long = toLong() and 0xFFFF_FFFFL
+private fun Short.toUnsigned(): Int = toInt() and 0xFFFF
+private fun Byte.toUnsigned(): Int = toInt() and 0xFF
+
+private fun ByteBuffer.uint32(): Long = int.toUnsigned()
 private fun ByteBuffer.int32(): Int = int
-private fun ByteBuffer.uint16(): Int = short.toInt() and 0xFFFF
+private fun ByteBuffer.uint16(): Int = short.toUnsigned()
 private fun ByteBuffer.int16(): Int = short.toInt()
-private fun ByteBuffer.uint8(): Int = get().toInt() and 0xFF
+private fun ByteBuffer.uint8(): Int = get().toUnsigned()
 private fun ByteBuffer.int8(): Int = get().toInt()
 
-private fun ByteBuffer.uint32(i: Int): Long = getInt(i).toLong() and 0xFFFF_FFFFL
+private fun ByteBuffer.uint32(i: Int): Long = getInt(i).toUnsigned()
 private fun ByteBuffer.int32(i: Int): Int = getInt(i)
-private fun ByteBuffer.uint16(i: Int): Int = getShort(i).toInt() and 0xFFFF
+private fun ByteBuffer.uint16(i: Int): Int = getShort(i).toUnsigned()
 private fun ByteBuffer.int16(i: Int): Int = getShort(i).toInt()
-private fun ByteBuffer.uint8(i: Int): Int = get(i).toInt() and 0xFF
+private fun ByteBuffer.uint8(i: Int): Int = get(i).toUnsigned()
 private fun ByteBuffer.int8(i: Int): Int = get(i).toInt()
+
+private fun ShortBuffer.uint16(): Int = get().toUnsigned()
+private fun ShortBuffer.intt16(): Int = get().toInt()
 
 // We are not supporting over 2GB font files. Just cast to Int.
 private fun ByteBuffer.position(i: Long) = position(i.toInt())
@@ -123,6 +131,48 @@ class OpenTypeParser(fontBuffer: ByteBuffer, val index: Int = 0) {
         return sbsBuilder.build()
     }
 
+    private fun parseCmapFormat4(offset: Long): SparseBitSet {
+        fontBuffer.position(offset)
+
+        fontBuffer.uint16() // ignore format
+        fontBuffer.uint16() // ignore length
+        fontBuffer.uint16() // ignore language
+        val segCount = fontBuffer.uint16() / 2 // segCount is doubled
+        fontBuffer.uint16() // ignore searchRange
+        fontBuffer.uint16() // ignore entrySelector
+        fontBuffer.uint16() // ignore rangeShift
+
+        // From now, read as int16 array.
+        val shortBuffer = fontBuffer.asShortBuffer()
+
+        val endCodes = ShortArray(segCount)
+        val startCodes = ShortArray(segCount)
+        val idDeltas = ShortArray(segCount)
+        val idRangeOffsets = ShortArray(segCount)
+
+        shortBuffer.get(endCodes, 0, segCount)
+        shortBuffer.uint16()  // ignore reservedPad
+        shortBuffer.get(startCodes, 0, segCount)
+        shortBuffer.get(idDeltas, 0, segCount)  // unused but for skipping
+        shortBuffer.get(idRangeOffsets, 0, segCount)
+
+        val sbsBuilder = SparseBitSet.Builder()
+        for (i in 0 until segCount - 1) {
+            val start = startCodes[i].toUnsigned()
+            val end = endCodes[i].toUnsigned()
+            val idRangeOffset = idRangeOffsets[i].toUnsigned()
+
+            if (idRangeOffset == 0) {
+                sbsBuilder.append(start, end + 1)  // end is inclusive
+            } else {
+                // TODO: Check Glyph ID which should not be zero.
+                sbsBuilder.append(start, end + 1)
+            }
+        }
+
+        return sbsBuilder.build()
+    }
+
     fun parseCoverage(): SparseBitSet {
         val cmapOffset = getTableOffset(TAG_cmap)
         if (cmapOffset == -1) return SparseBitSet.Builder().build()
@@ -150,11 +200,11 @@ class OpenTypeParser(fontBuffer: ByteBuffer, val index: Int = 0) {
         if (highestScore == Int.MAX_VALUE) return SparseBitSet.Builder().build()
 
         fontBuffer.position(cmapOffset + highestTableOffset)
-        var format = fontBuffer.uint16()
+        val format = fontBuffer.uint16()
         if (format == 12) {
             return parseCmapFormat12(cmapOffset + highestTableOffset)
         } else if (format == 4) {
-            TODO("Format 4 is not yet supported.")
+            return parseCmapFormat4(cmapOffset + highestTableOffset)
         } else {
             throw RuntimeException("Cmap format 4 or format 12 is expected.")
         }
