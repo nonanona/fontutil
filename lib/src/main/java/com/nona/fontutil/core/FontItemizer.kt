@@ -68,7 +68,7 @@ class FontItemizer(val collection: FontCollection) {
 
     }
 
-    fun itemize(text: String): Array<Run> {
+    fun itemize(text: CharSequence): Array<Run> {
         val clusterEndIndices = mutableListOf<Int>()
         val clusterFamilies = mutableListOf<FontFamily?>()
 

@@ -23,6 +23,6 @@ class DebugActivity : Activity() {
 
         val collection = FontCollection(arrayOf(mansalva, kosugiMaru), Typeface.SERIF)
 
-        textView.text = SpanProcessor.process(textView.text, collection)
+        textView.text = SpanProcessor.process("こんにちは、 World", collection)
     }
 }
