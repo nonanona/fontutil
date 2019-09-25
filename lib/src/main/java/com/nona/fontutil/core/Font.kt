@@ -23,9 +23,9 @@ data class Font private constructor(
 ) {
 
     class Builder {
-        val fontBuffer: ByteBuffer
-        val typeface: Typeface
-        var fontStyle: FontStyle? = null
+        private val fontBuffer: ByteBuffer
+        private val typeface: Typeface
+        private var fontStyle: FontStyle? = null
 
         constructor(assets: AssetManager, filePath: String) {
             fontBuffer = IOUtil.mmap(assets, filePath)

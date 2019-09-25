@@ -71,9 +71,18 @@ class FontItemizer(val collection: FontCollection) {
     fun itemize(text: CharSequence): Array<Run> {
         val clusterEndIndices = mutableListOf<Int>()
         val clusterFamilies = mutableListOf<FontFamily?>()
+        var isPrevSpace = false
 
         querySegmentor(text, 0, text.length) { i, cp, vs ->
-            val prevFamily = if (clusterFamilies.isNotEmpty()) clusterFamilies.last() else null
+            val prevFamily = if (isPrevSpace) {
+                // Minikin split character before and after for caching purpose. We don't need this
+                // optimization but to reset the itemization context, reset prevFamily
+                null
+            } else if (clusterFamilies.isEmpty()) {
+                null
+            } else {
+                clusterFamilies.last()
+            }
 
             if (prevFamily != null && cp in prevFamily) {
                 // continue if previous family also support current code point.
@@ -82,12 +91,13 @@ class FontItemizer(val collection: FontCollection) {
             }
 
             val family = selectFamilyForCodePoint(cp, vs)
-            if (family != prevFamily) {
+            if (isPrevSpace && family != prevFamily) {
                 // Here is the run transitoin point.
                 if (clusterFamilies.isNotEmpty())
                     clusterEndIndices.add(i)
                 clusterFamilies.add(family)
             }
+            isPrevSpace = (cp == 0x0020 || (0x2000 <= cp && cp <= 0x200A) || cp == 0x3000)
         }
 
         clusterEndIndices.add(text.length)

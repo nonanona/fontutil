@@ -3,6 +3,7 @@ package com.nona.fontutil.demo
 import android.app.Activity
 import android.graphics.Typeface
 import android.os.Bundle
+import com.nona.fontutil.assets.AssetsXMLParser
 import com.nona.fontutil.core.Font
 import com.nona.fontutil.core.FontCollection
 import com.nona.fontutil.core.FontFamily
@@ -21,7 +22,7 @@ class DebugActivity : Activity() {
             arrayOf(Font.Builder(assets, "kosugi-maru/KosugiMaru-Regular.ttf").build())
         ).build()
 
-        val collection = FontCollection(arrayOf(mansalva, kosugiMaru), Typeface.SERIF)
+        val collection = AssetsXMLParser.parseFontCollectionXml(this, "font/roboto.xml")
 
         textView.text = SpanProcessor.process("こんにちは、 World", collection)
     }

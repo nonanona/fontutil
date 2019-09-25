@@ -1,0 +1,5 @@
+<resources>
+    <declare-styleable name="FontUtil">
+        <attr name="fontCollection" format="string" />
+    </declare-styleable>
+</resources>
