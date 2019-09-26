@@ -9,6 +9,11 @@ import java.nio.ShortBuffer
 data class FontStyle(val weight: Int, val italic: Boolean)
 data class NameRecord(val familyName: String, val subFamilyName: String)
 
+// The same logic in Minikin
+fun styleDistance(a: FontStyle, b: FontStyle): Int {
+    return ((a.weight - b.weight) / 100) + (if (a.italic == b.italic) 2 else 0)
+}
+
 private fun Int.toUnsigned(): Long = toLong() and 0xFFFF_FFFFL
 private fun Short.toUnsigned(): Int = toInt() and 0xFFFF
 private fun Byte.toUnsigned(): Int = toInt() and 0xFF

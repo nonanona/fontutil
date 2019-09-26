@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.res.AssetManager
 import android.content.res.Resources
 import android.graphics.Typeface
+import android.net.Uri
 import android.os.Build
 import androidx.annotation.FontRes
 import com.nona.fontutil.base.FileUtil
@@ -38,6 +39,19 @@ data class Font private constructor(
             var fontBuffer: ByteBuffer? = null
             var typeface: Typeface? = null
             FileUtil.copyToTemporaryFile(context, fontResId).use {
+                fontBuffer = IOUtil.mmap(it.file)
+                typeface = Typeface.createFromFile(it.file)
+                    ?: throw IOException("Failed to create Typeface from resource")
+            }
+            this.fontBuffer = fontBuffer!!
+            this.typeface = typeface!!
+        }
+
+        constructor(context: Context, uri: Uri) {
+            var fontBuffer: ByteBuffer? = null
+            var typeface: Typeface? = null
+
+            FileUtil.copyToTemporaryFile(context, uri).use {
                 fontBuffer = IOUtil.mmap(it.file)
                 typeface = Typeface.createFromFile(it.file)
                     ?: throw IOException("Failed to create Typeface from resource")
