@@ -1,10 +1,20 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <FontCollection fallback="sans-serif">
 
+    <!--
     <AssetDirectoryFontFamily path="mansalva" />
 
     <FontFamily>
         <AssetFont path="font/kosugi-maru/KosugiMaru-Regular.ttf" />
     </FontFamily>
+
+    -->
+    <GoogleFontFamily name="Nunito" />
+
+    <!--
+    <FontFamily>
+        <GoogleFont query=""
+    </FontFamily>
+    -->
 
 </FontCollection>

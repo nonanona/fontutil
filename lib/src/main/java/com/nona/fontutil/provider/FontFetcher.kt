@@ -39,27 +39,33 @@ class FontFetcher(
         .authority(authority)
         .build()
 
+    private fun buildQuery(name: String, weight: Int?, italic: Boolean?): String {
+        var res = "name=$name"
+        if (weight != null) {
+            res += "&amp;weight=$weight"
+        }
+        if (italic != null) {
+            res += "&amp;italic=$italic"
+        }
+        return res
+    }
 
-    /**
-     * Fetch a font from the provider.
-     *
-     * If the provider sends multiple font files, select the closed style font and return it.
-     */
-    fun fetchSingleFont(query: String, style: FontStyle): Font? {
-        val best = fetchFontList(query).minBy {
-            styleDistance(style, FontStyle(it.weight, it.italic))
+    fun fetchSingleFont(name: String, weight: Int?, italic: Boolean?): Font? {
+        val list = fetchFontList(buildQuery(name, weight, italic))
+        if (list.isEmpty()) return null
+        if (weight == null && italic == null) {
+            return createFont(list[0])
+        }
+
+        val bestFont = list.minBy {
+            styleDistance(
+                FontStyle(it.weight, it.italic),
+                FontStyle(weight ?: it.weight, italic ?: it.italic))
         } ?: return null
 
-
-        return createFont(best)
+        return createFont(bestFont)
     }
 
-    /**
-     * Fetch multiple fonts from the provider
-     */
-    fun fetchMultipleFont(query: String) {
-
-    }
 
     private fun createFont(fontInfo: FontFileInfo): Font? {
         return Font.Builder(appContext, fontInfo.fileUri)
