@@ -19,6 +19,7 @@ open class FontProviderTagParser(val appContext: Context, val authority: String)
                 fontFetcher.fetchSingleFont(name, weight, italic)?.let { list.add(it) }
             }
         }
+        if (list.isEmpty()) return null
         return FontFamily.Builder(list.toTypedArray()).build()
     }
 

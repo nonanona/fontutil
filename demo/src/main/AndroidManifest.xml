@@ -3,6 +3,7 @@
     package="com.nona.fontutil.demo">
 
     <application
+        android:name=".MainApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -25,6 +26,22 @@
         
         <activity android:name=".systemfonts.SystemFontsLitDumpActivity"
             android:label="System Fonts/Dump All System Fonts">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.nona.fontutil.demos.SAMPLE_CODE" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".views.FontCollectionTextViewActivity"
+            android:label="Views/FontCollectionTextView">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.nona.fontutil.demos.SAMPLE_CODE" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".views.CustomBindingActivity"
+            android:label="Views/Custom Binding Example">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="com.nona.fontutil.demos.SAMPLE_CODE" />

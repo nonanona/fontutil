@@ -1,5 +1,5 @@
 <resources>
-    <declare-styleable name="FontUtil">
+    <declare-styleable name="FontCollectionTextView">
         <attr name="fontCollection" format="string" />
     </declare-styleable>
 </resources>

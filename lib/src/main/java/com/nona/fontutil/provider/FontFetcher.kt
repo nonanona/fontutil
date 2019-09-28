@@ -52,6 +52,9 @@ class FontFetcher(
 
     fun fetchSingleFont(name: String, weight: Int?, italic: Boolean?): Font? {
         val list = fetchFontList(buildQuery(name, weight, italic))
+            .filter {
+                it.resultCode == 0
+            }
         if (list.isEmpty()) return null
         if (weight == null && italic == null) {
             return createFont(list[0])

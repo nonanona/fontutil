@@ -25,7 +25,7 @@ private fun XmlPullParser.getAttributes(): Map<String, String> {
 
 class AssetsXMLParser private constructor() {
     companion object {
-        fun parseFontCollectionXml(context: Context, xmlPath: String): FontCollection {
+        fun parseFontCollectionXml(context: Context, xmlPath: String): FontCollection? {
            return context.assets.open(xmlPath).use {
                 val parser = Xml.newPullParser()
                 parser.setInput(it, null)
@@ -41,7 +41,7 @@ class AssetsXMLParser private constructor() {
             return CustomTagParserManager.obtainParser(key)
         }
 
-        private fun parseFontCollection(context: Context, parser: XmlPullParser): FontCollection {
+        private fun parseFontCollection(context: Context, parser: XmlPullParser): FontCollection? {
             val list = mutableListOf<FontFamily>()
 
             parser.nextTag()
@@ -64,7 +64,7 @@ class AssetsXMLParser private constructor() {
             }
 
             val fallback = Typeface.create(fallbackName, Typeface.NORMAL) ?: Typeface.DEFAULT
-
+            if (list.isEmpty()) return null
             return FontCollection(list.toTypedArray(), fallback)
         }
 
