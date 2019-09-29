@@ -4,9 +4,8 @@ import android.content.Context
 import com.nona.fontutil.assets.CustomTagParser
 import com.nona.fontutil.core.Font
 import com.nona.fontutil.core.FontFamily
-import java.lang.IllegalArgumentException
 
-open class FontProviderTagParser(val appContext: Context, val authority: String) : CustomTagParser {
+open class FontProviderTagParser(appContext: Context, authority: String) : CustomTagParser {
 
     val fontFetcher = FontFetcher(appContext, authority)
 

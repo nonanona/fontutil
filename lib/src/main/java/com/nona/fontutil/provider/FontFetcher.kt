@@ -1,20 +1,15 @@
 package com.nona.fontutil.provider
 
-import android.annotation.SuppressLint
 import android.content.ContentResolver
 import android.content.ContentUris
 import android.content.Context
 import android.net.Uri
-import android.util.Log
-import com.nona.fontutil.base.IOUtil
 import com.nona.fontutil.core.Font
-import com.nona.fontutil.core.FontFamily
 import com.nona.fontutil.core.otparser.FontStyle
 import com.nona.fontutil.core.otparser.styleDistance
 import com.nona.fontutil.coroutines.FontCoroutineScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
-
 import androidx.core.provider.FontsContractCompat.Columns as FontColumns
 
 class FontFetcher(

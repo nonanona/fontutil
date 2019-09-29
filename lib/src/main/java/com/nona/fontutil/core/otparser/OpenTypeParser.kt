@@ -48,7 +48,6 @@ private const val TAG_name = 0x6E_61_6D_65L
 
 class OpenTypeParser(fontBuffer: ByteBuffer, val index: Int = 0) {
 
-
     private val fontBuffer = fontBuffer.slice().apply { order(ByteOrder.BIG_ENDIAN) }
 
     private fun getTableOffset(tableTag: Long, bufferOffset:Int = 0): Int {
@@ -273,14 +272,14 @@ class OpenTypeParser(fontBuffer: ByteBuffer, val index: Int = 0) {
 
         // The String is encoded in UTF-16BE.
         val familyNameChars = CharArray(familyNameLength / 2)
-        for (j in 0 until familyNameChars.size) {
+        for (j in familyNameChars.indices) {
             familyNameChars[j] = fontBuffer.getChar(
                 nameOffset + stringOffset + familyNameOffset + j * 2
             )
         }
 
         val subFamilyChars = CharArray(subFamilyNameLength / 2)
-        for (j in 0 until subFamilyChars.size) {
+        for (j in subFamilyChars.indices) {
             subFamilyChars[j] = fontBuffer.getChar(
                 nameOffset + stringOffset + subFamilyNameOffset + j * 2
             )

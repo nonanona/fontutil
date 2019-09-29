@@ -1,8 +1,11 @@
 package com.nona.fontutil.core
 
-import java.lang.IllegalArgumentException
-
-data class FontFamily private constructor(
+/**
+ * A font family
+ *
+ * A FontFamily here means that the bundle of multiple styled font files.
+ */
+class FontFamily private constructor(
     val fonts: Array<Font>,
     val name: String
 ) {

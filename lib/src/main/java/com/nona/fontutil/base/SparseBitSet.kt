@@ -1,12 +1,16 @@
 package com.nona.fontutil.base
 
-import java.io.IOException
-
 private const val MAX_CAPACITY = 0xFF_FFFF
 private const val FULLBIT_INT = -1
 private const val TOP_BIT_INT = -2147483648
 
-/**                                                                (1 element = 256 bits = 8 dwords)
+/**
+ * A SparseBitSet
+ *
+ * This is simplified and Kotlin based version of SparseBitSet.h in Minikin.
+ * https://android.googlesource.com/platform/frameworks/minikin/+/refs/heads/master/include/minikin/SparseBitSet.h
+ *
+ *                                                              (1 element = 256 bits = 8 dwords)
  * 0000-00FF: page = 0x00, indices[0x00] = slot[0x00] = bitmaps[0x00] = 00100010...000000010
  * 0100-01FF: page = 0x01, indices[0x01] = slot[0x01] = bitmaps[0x08] = 00001001...000001000
  * 0200-02FF: page = 0x02, indices[0x02] = slot[0x02] = bitmaps[0x10] = 00000000...000000000
@@ -24,7 +28,7 @@ class SparseBitSet private constructor(
     private val bitmaps: IntArray,
     val maxValue: Int) {
 
-    class Builder {
+    internal class Builder {
         private val starts = mutableListOf<Int>()
         private val ends = mutableListOf<Int>()
 

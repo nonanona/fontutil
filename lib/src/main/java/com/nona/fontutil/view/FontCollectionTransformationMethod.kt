@@ -7,8 +7,8 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.runBlocking
 
 class FontCollectionTransformationMethod(
-    val parent: TransformationMethod?,
-    val deferredCollection: Deferred<FontCollection?>
+    private val parent: TransformationMethod?,
+    private val deferredCollection: Deferred<FontCollection?>
 ): TransformationMethod {
     override fun onFocusChanged(
         view: View?,

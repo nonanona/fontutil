@@ -15,7 +15,20 @@ import kotlinx.coroutines.async
 import org.xmlpull.v1.XmlPullParser
 import java.io.IOException
 
+/**
+ * A class parses the FontCollection XML file in the assets directory.
+ */
 object AssetsXMLParser {
+    /**
+     * Parses the FontCollection XML file in the assets directory.
+     *
+     * Note that this parser may also access to system service or internet for fetching font data.
+     *
+     * @param appContext An application context since the file parsing may happen on different
+     *                   thread. To avoid context leakage, must pass application context.
+     * @param xmlPath A file path to the XML file from the root of assets directory.
+     * @param scope A coroutine scope used for parsing the XML file.
+     */
     fun parseFontCollectionXmlAsync(
         appContext: Context,
         xmlPath: String,
@@ -57,7 +70,6 @@ object AssetsXMLParser {
 
         parser.nextTag()
         parser.require(XmlPullParser.START_TAG, null, "FontCollection")
-        val fallbackName = parser.getAttributeValue(null, "fallback")
         while (parser.next() != XmlPullParser.END_TAG) {
 
             if (parser.eventType != XmlPullParser.START_TAG) continue
@@ -74,9 +86,8 @@ object AssetsXMLParser {
             list.add(family)
         }
 
-        val fallback = Typeface.create(fallbackName, Typeface.NORMAL) ?: Typeface.DEFAULT
         if (list.isEmpty()) return null
-        return FontCollection(list.toTypedArray(), fallback)
+        return FontCollection(list.toTypedArray())
     }
 
     private fun getCustomFontParser(tag: String): CustomTagParser? {

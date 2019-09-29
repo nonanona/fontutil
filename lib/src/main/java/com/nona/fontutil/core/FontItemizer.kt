@@ -22,7 +22,10 @@ private fun CharSequence.codePointAt(i: Int, end: Int): Int {
 
 private fun isVariationSelector(cp: Int) = (cp in 0xFE00 .. 0xFE0F) || (cp in 0xE0100 .. 0xE01EF)
 
-class FontItemizer(val collection: FontCollection) {
+/**
+ * A font itemizer which resolves the font to be used in the text.
+ */
+class FontItemizer(private val collection: FontCollection) {
     data class Run(val length: Int, val family: FontFamily?)
 
     private fun selectFamilyForCodePoint(cp: Int, vs: Int): FontFamily? {
@@ -64,8 +67,6 @@ class FontItemizer(val collection: FontCollection) {
 
             segment(segStart, currentCp, vs)
         }
-
-
     }
 
     fun itemize(text: CharSequence): Array<Run> {

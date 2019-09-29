@@ -3,10 +3,8 @@ package com.nona.fontutil.core
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.AssetManager
-import android.content.res.Resources
 import android.graphics.Typeface
 import android.net.Uri
-import android.os.Build
 import androidx.annotation.FontRes
 import com.nona.fontutil.base.FileUtil
 import com.nona.fontutil.base.IOUtil
@@ -17,9 +15,21 @@ import com.nona.fontutil.core.otparser.OpenTypeParser
 import java.io.IOException
 import java.nio.ByteBuffer
 
-data class Font private constructor(
+/**
+ * A class represents a single font file
+ */
+class Font private constructor(
+    /**
+     * A byte buffer of this font file.
+     */
     val fontBuffer: ByteBuffer,
+    /**
+     * A Typeface object associated with this font object.
+     */
     val typeface: Typeface,
+    /**
+     * A resolved font style of this font file.
+     */
     val style: FontStyle
 ) {
 
@@ -71,9 +81,18 @@ data class Font private constructor(
         }
     }
 
+    /**
+     * The character coverage store in cmap table.
+     */
     val cmapCoverage: SparseBitSet by lazy { OpenTypeParser(fontBuffer).parseCoverage() }
 
+    /**
+     * The family name stored in name table.
+     */
     val nameRecord: NameRecord by lazy { OpenTypeParser(fontBuffer).parseName() }
 
+    /**
+     * Returns true if the character is supported by this font.
+     */
     operator fun contains(codePoint: Int): Boolean = codePoint in cmapCoverage
 }
