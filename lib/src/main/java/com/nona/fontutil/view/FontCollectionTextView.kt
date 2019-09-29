@@ -3,7 +3,6 @@ package com.nona.fontutil.view
 import FontCollectionTransformationMethod
 import android.content.Context
 import android.util.AttributeSet
-import android.util.Log
 import android.widget.TextView
 import com.nona.fontutil.R
 import com.nona.fontutil.assets.AssetsXMLParser
@@ -19,7 +18,7 @@ open class FontCollectionTextView : TextView {
 
         val xml = a.getString(R.styleable.FontCollectionTextView_fontCollection)
 
-        val collection = AssetsXMLParser.parseFontCollectionXml(context, xml) ?: return
+        val collection = AssetsXMLParser.parseFontCollectionXmlAsync(context.applicationContext, xml)
 
         transformationMethod = FontCollectionTransformationMethod(
             transformationMethod, collection)

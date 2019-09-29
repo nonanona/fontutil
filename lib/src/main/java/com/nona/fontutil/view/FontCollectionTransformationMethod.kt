@@ -3,11 +3,13 @@ import android.text.method.TransformationMethod
 import android.view.View
 import com.nona.fontutil.core.FontCollection
 import com.nona.fontutil.span.SpanProcessor
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.runBlocking
 
 class FontCollectionTransformationMethod(
     val parent: TransformationMethod?,
-    val collection: FontCollection
-) : TransformationMethod {
+    val deferredCollection: Deferred<FontCollection?>
+): TransformationMethod {
     override fun onFocusChanged(
         view: View?,
         sourceText: CharSequence?,
@@ -18,10 +20,12 @@ class FontCollectionTransformationMethod(
         parent?.onFocusChanged(view, sourceText, focused, direction, previouslyFocusedRect)
     }
 
-    override fun getTransformation(source: CharSequence?, view: View?): CharSequence {
-        val parentProcessed = parent?.getTransformation(source, view) ?: source ?: return ""
-
-        return SpanProcessor.process(parentProcessed, collection)
+    override fun getTransformation(source: CharSequence?, view: View?): CharSequence = runBlocking {
+        val parentProcessed = parent?.getTransformation(source, view) ?: source ?: ""
+        val collection = deferredCollection.await()
+        if (collection == null)
+            parentProcessed
+        else
+            SpanProcessor.process(parentProcessed, collection)
     }
-
 }

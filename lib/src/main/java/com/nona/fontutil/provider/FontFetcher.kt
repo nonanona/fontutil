@@ -11,6 +11,9 @@ import com.nona.fontutil.core.Font
 import com.nona.fontutil.core.FontFamily
 import com.nona.fontutil.core.otparser.FontStyle
 import com.nona.fontutil.core.otparser.styleDistance
+import com.nona.fontutil.coroutines.FontCoroutineScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.async
 
 import androidx.core.provider.FontsContractCompat.Columns as FontColumns
 
@@ -26,6 +29,31 @@ class FontFetcher(
         val italic: Boolean,
         val resultCode: Int
     )
+
+    suspend fun fetchSingleFont(
+        name: String,
+        weight: Int?,
+        italic: Boolean?,
+        scope: CoroutineScope = FontCoroutineScope.fontScope
+    ) = scope.async async@ {
+        val list = fetchFontList(buildQuery(name, weight, italic))
+            .filter {
+                it.resultCode == 0
+            }
+        if (list.isEmpty()) return@async null
+        if (weight == null && italic == null) {
+            return@async createFont(list[0])
+        }
+
+        val bestFont = list.minBy {
+            styleDistance(
+                FontStyle(it.weight, it.italic),
+                FontStyle(weight ?: it.weight, italic ?: it.italic)
+            )
+        } ?: return@async null
+
+        return@async createFont(bestFont)
+    }.await()
 
     // We may fetch in background thread. To avoid leaking the given context, store the appContext
     // ref instead.
@@ -49,26 +77,6 @@ class FontFetcher(
         }
         return res
     }
-
-    fun fetchSingleFont(name: String, weight: Int?, italic: Boolean?): Font? {
-        val list = fetchFontList(buildQuery(name, weight, italic))
-            .filter {
-                it.resultCode == 0
-            }
-        if (list.isEmpty()) return null
-        if (weight == null && italic == null) {
-            return createFont(list[0])
-        }
-
-        val bestFont = list.minBy {
-            styleDistance(
-                FontStyle(it.weight, it.italic),
-                FontStyle(weight ?: it.weight, italic ?: it.italic))
-        } ?: return null
-
-        return createFont(bestFont)
-    }
-
 
     private fun createFont(fontInfo: FontFileInfo): Font? {
         return Font.Builder(appContext, fontInfo.fileUri)
@@ -138,14 +146,16 @@ class FontFetcher(
                 else
                     null
 
-                result.add(FontFileInfo(
-                    fileUri = fileUri,
-                    index = index,
-                    weight = weight,
-                    italic = italic,
-                    varSettings = varSettings,
-                    resultCode = resultCode
-                ))
+                result.add(
+                    FontFileInfo(
+                        fileUri = fileUri,
+                        index = index,
+                        weight = weight,
+                        italic = italic,
+                        varSettings = varSettings,
+                        resultCode = resultCode
+                    )
+                )
             }
 
             return result

@@ -10,7 +10,7 @@ open class FontProviderTagParser(val appContext: Context, val authority: String)
 
     val fontFetcher = FontFetcher(appContext, authority)
 
-    override fun parseFamily(attributes: Map<String, String>): FontFamily? {
+    override suspend fun parseFamily(attributes: Map<String, String>): FontFamily? {
         val name = attributes.get("name") ?: throw IllegalArgumentException("name attr is required")
 
         val list = mutableListOf<Font>()
@@ -23,7 +23,7 @@ open class FontProviderTagParser(val appContext: Context, val authority: String)
         return FontFamily.Builder(list.toTypedArray()).build()
     }
 
-    override fun parseFont(attributes: Map<String, String>): Font? {
+    override suspend fun parseFont(attributes: Map<String, String>): Font? {
         val name = attributes.get("name") ?: throw IllegalArgumentException("name attr is required")
         val weight = attributes.get("weight")
         val italic = attributes.get("italic")

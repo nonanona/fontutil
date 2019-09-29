@@ -10,13 +10,12 @@ import com.nona.fontutil.core.FontItemizer
 
 data class TypefaceSpan(val typeface: Typeface) : MetricAffectingSpan() {
     override fun updateMeasureState(textPaint: TextPaint) {
-        textPaint.setTypeface(typeface)
+        textPaint.typeface = typeface
     }
 
     override fun updateDrawState(tp: TextPaint?) {
-        tp?.setTypeface(typeface)
+        tp?.typeface = typeface
     }
-
 }
 
 class SpanProcessor private constructor() {
