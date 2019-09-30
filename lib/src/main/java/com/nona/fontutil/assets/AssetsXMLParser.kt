@@ -80,7 +80,9 @@ object AssetsXMLParser {
                 else -> {
                     val customParser = getCustomFamilyParser(parser.name)
                         ?: throw RuntimeException("Unknown Tag: ${parser.name}")
-                    customParser.parseFamily(parser.getAttributes())
+                    val attributes = parser.getAttributes()
+                    skip(parser)  // Custom tag doesn't have any child. Skipping...
+                    customParser.parseFamily(attributes)
                 }
             } ?: continue
             list.add(family)
@@ -111,7 +113,9 @@ object AssetsXMLParser {
                 else -> {
                     val customParser = getCustomFontParser(parser.name)
                         ?: throw RuntimeException("Unknown Tag: ${parser.name}")
-                    customParser.parseFont(parser.getAttributes())
+                    val attributes = parser.getAttributes()
+                    skip(parser)  // Custom tag doesn't have any child. Skipping...
+                    customParser.parseFont(attributes)
                 }
             } ?: continue
             list.add(font)
@@ -140,6 +144,7 @@ object AssetsXMLParser {
         val builder = FontFamily.Builder(list.toTypedArray())
         if (familyName != null)
             builder.name = familyName
+        skip(parser)  // AssetDirectoryFontFamily tag doesn't have any child. Skipping...
         return builder.build()
     }
 
@@ -159,5 +164,16 @@ object AssetsXMLParser {
 
         // TODO: Parse index/varSettings
         return builder.build()
+    }
+
+    private fun skip(parser: XmlPullParser) {
+        var depth = 1;
+        while (depth > 0) {
+            when(parser.next()) {
+                XmlPullParser.START_TAG -> depth++
+                XmlPullParser.END_TAG -> depth--
+                else -> {} // do nothing
+            }
+        }
     }
 }

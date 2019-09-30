@@ -19,8 +19,7 @@ class FontItemizerTest {
         val collection = FontCollection(arrayOf(
             FontFamily.Builder(arrayOf(
                 Font.Builder(context.assets, "fonts/roboto-font/Roboto-Regular.ttf").build()
-            )).build()),
-            Typeface.SANS_SERIF
+            )).build())
         )
 
         val res = FontItemizer(collection).itemize("Hello, World.")
@@ -35,8 +34,7 @@ class FontItemizerTest {
         val collection = FontCollection(arrayOf(
             FontFamily.Builder(arrayOf(
                 Font.Builder(context.assets, "fonts/roboto-font/Roboto-Regular.ttf").build()
-            )).build()),
-            Typeface.SANS_SERIF
+            )).build())
         )
 
         val res = FontItemizer(collection).itemize("Hello, 世界.")
@@ -58,8 +56,7 @@ class FontItemizerTest {
             )).build(),
             FontFamily.Builder(arrayOf(
                 Font.Builder(context.assets, "fonts/noto-cjk/NotoSerifCJK-Regular.ttc").build()
-            )).build()),
-            Typeface.SANS_SERIF
+            )).build())
         )
 
         val res = FontItemizer(collection).itemize("Hello, 世界.")

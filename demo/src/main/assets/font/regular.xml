@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- FontCollection resolves fonts from the top. -->
+<FontCollection>
+    <!-- GoogleFontFamily fetches fonts via Downloadable fonts -->
+    <GoogleFontFamily name="Dancing Script" />
+
+    <!-- AssetDirectoryFontFamily loads all fonts in the directory. -->
+    <AssetDirectoryFontFamily path="fontawesome"/>
+
+    <!-- Manually create font family structure -->
+    <FontFamily>
+        <!-- Use specific font file as a member of FontFamily -->
+        <AssetFont path="kosugi-maru/KosugiMaru-Regular.ttf" />
+    </FontFamily>
+</FontCollection>

@@ -13,7 +13,7 @@ class FontTest {
     @Test
     fun create_from_asset() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
-        val font = Font.Builder(context.assets, "fonts/Roboto-Regular.ttf").build()
+        val font = Font.Builder(context.assets, "fonts/roboto-font/Roboto-Regular.ttf").build()
         assertThat(font).isNotNull()
         assertThat(font.style).isEqualTo(FontStyle(400, false))
     }
@@ -30,7 +30,7 @@ class FontTest {
     @Test
     fun create_from_asset_override_style() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
-        val font = Font.Builder(context.assets, "fonts/Roboto-Regular.ttf")
+        val font = Font.Builder(context.assets, "fonts/roboto-font/Roboto-Regular.ttf")
             .setStyle(FontStyle(700, true))
             .build()
         assertThat(font).isNotNull()

@@ -29,6 +29,7 @@ class FontFetcher(
         name: String,
         weight: Int?,
         italic: Boolean?,
+        strictStyle: Boolean,
         scope: CoroutineScope = FontCoroutineScope.fontScope
     ) = scope.async async@ {
         val list = fetchFontList(buildQuery(name, weight, italic))
@@ -47,6 +48,22 @@ class FontFetcher(
             )
         } ?: return@async null
 
+        if (strictStyle) {
+            if (weight == null) {
+                if (italic == null) {
+                    // do nothing
+                } else {
+                    if (bestFont.italic != italic) return@async null
+                }
+            } else {
+                if (italic == null) {
+                    if (bestFont.weight != weight) return@async null
+                } else {
+                    if (bestFont.weight != weight || bestFont.italic != italic) return@async null
+                }
+            }
+
+        }
         return@async createFont(bestFont)
     }.await()
 

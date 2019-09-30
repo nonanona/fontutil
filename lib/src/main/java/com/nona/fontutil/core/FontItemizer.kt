@@ -44,9 +44,8 @@ class FontItemizer(private val collection: FontCollection) {
         start: Int,  // inclusive
         end:Int,  // exclusive
         segment: (index: Int, cp: Int, vs: Int) -> Unit) {
-        var segStart = start
-
-        var currentCp = 0
+        var segStart: Int
+        var currentCp: Int
         var nextCp = text.codePointAt(start, end)
 
         var i = start
@@ -92,7 +91,7 @@ class FontItemizer(private val collection: FontCollection) {
             }
 
             val family = selectFamilyForCodePoint(cp, vs)
-            if (isPrevSpace && family != prevFamily) {
+            if (clusterFamilies.isEmpty() || isPrevSpace || family != prevFamily) {
                 // Here is the run transitoin point.
                 if (clusterFamilies.isNotEmpty())
                     clusterEndIndices.add(i)
