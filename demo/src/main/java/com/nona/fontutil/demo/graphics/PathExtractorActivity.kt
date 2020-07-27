@@ -1,15 +1,14 @@
 package com.nona.fontutil.demo.graphics
 
+import android.animation.ValueAnimator
 import android.annotation.TargetApi
 import android.app.Activity
 import android.content.Context
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.Path
+import android.graphics.*
 import android.os.Build
 import android.os.Bundle
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.nona.fontutil.core.otparser.Glyph
@@ -32,9 +31,19 @@ class PathDrawView : View {
         defStyleRes: Int
     ) : super(context, attrs, defStyleAttr, defStyleRes)
 
+    var progress: Float = 0f
+        set(value) {
+            invalidate()
+            field = value
+        }
+        get() = field
+
     val textSize = 1000f
     var path: Path? = null
-    val paint = Paint().apply { color = Color.GRAY }
+    val paint = Paint().apply {
+        color = Color.GRAY
+        style = Paint.Style.STROKE
+    }
     var glyph: OutlineGlyph? = null
     val onCurvePaint = Paint().apply { color = Color.RED }
     val offCurvePaint = Paint().apply { color = Color.BLUE }
@@ -43,8 +52,10 @@ class PathDrawView : View {
         val ot = OpenType(context.assets, "kosugi-maru/KosugiMaru-Regular.ttf", 1)
         val glyphId = ot.getGlyphId('鬱'.toInt())
         path = ot.getGlyphPath(glyphId, textSize)
-        glyph = ot.getGlyph(glyphId) as OutlineGlyph
+        //glyph = ot.getGlyph(glyphId) as OutlineGlyph
     }
+
+    val grad = LinearGradient(0f, 0f, 100f, 100f, Color.GREEN, Color.BLUE, Shader.TileMode.MIRROR)
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
@@ -54,7 +65,10 @@ class PathDrawView : View {
             canvas.translate(0f, canvas.height * 2f / 3f)
 
             path?.let {
-                canvas.drawPath(it, paint)
+                canvas.drawPath(it, paint.apply {
+                    strokeWidth = 5f + 20f * progress
+                    setShader(grad)
+                })
             }
 
             glyph?.let{
@@ -81,6 +95,16 @@ class PathDrawView : View {
 class PathExtractorActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(PathDrawView(this))
+        val view = PathDrawView(this)
+        setContentView(view)
+
+        val anim = ValueAnimator.ofFloat(0f, 1f)
+        anim.setDuration(3000)
+        anim.addUpdateListener {
+            view.progress = it.getAnimatedValue() as Float
+        }
+        anim.repeatMode = ValueAnimator.REVERSE
+        anim.repeatCount = 1000
+        anim.start()
     }
 }
