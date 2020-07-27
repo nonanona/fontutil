@@ -3,6 +3,7 @@ package com.nona.fontutil.core.otparser
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
 import com.nona.fontutil.base.IOUtil
+import com.nona.fontutil.graphics.OpenType
 import com.nona.fontutil.test.TestUtil
 import org.junit.Test
 
@@ -147,5 +148,18 @@ class OpenTypeParserTest {
 
         assertThat(OpenTypeParser(buffer, 3).parseName())
             .isEqualTo(NameRecord("Noto Serif CJK TC", "Regular"))
+    }
+
+    @Test
+    fun `getGlyphId`() {
+        val fontFile = TestUtil.getThirdPartyFile("$ROBOTO_DIR_PREFIX/Roboto-Regular.ttf")
+
+        assertWithMessage("File must exists: ${fontFile.absolutePath}")
+            .that(fontFile.exists())
+            .isTrue()
+
+        val ot = OpenType(fontFile)
+        val r = ot.getGlyphId('a'.toInt())
+        ot.getGlyph(r)
     }
 }

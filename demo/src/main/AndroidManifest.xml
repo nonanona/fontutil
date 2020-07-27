@@ -48,6 +48,14 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".graphics.PathExtractorActivity"
+            android:label="Graphics/Path Extractor Example">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.nona.fontutil.demos.SAMPLE_CODE" />
+            </intent-filter>
+        </activity>
+
     </application>
 
 </manifest>

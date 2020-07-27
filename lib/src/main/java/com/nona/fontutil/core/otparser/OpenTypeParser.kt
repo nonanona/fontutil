@@ -1,6 +1,6 @@
 package com.nona.fontutil.core.otparser
 
-import com.nona.fontutil.base.SparseBitSet
+import com.nona.fontutil.base.*
 import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -13,38 +13,6 @@ data class NameRecord(val familyName: String, val subFamilyName: String)
 fun styleDistance(a: FontStyle, b: FontStyle): Int {
     return ((a.weight - b.weight) / 100) + (if (a.italic == b.italic) 2 else 0)
 }
-
-private fun Int.toUnsigned(): Long = toLong() and 0xFFFF_FFFFL
-private fun Short.toUnsigned(): Int = toInt() and 0xFFFF
-private fun Byte.toUnsigned(): Int = toInt() and 0xFF
-
-private fun ByteBuffer.uint32(): Long = int.toUnsigned()
-private fun ByteBuffer.int32(): Int = int
-private fun ByteBuffer.uint16(): Int = short.toUnsigned()
-private fun ByteBuffer.int16(): Int = short.toInt()
-private fun ByteBuffer.uint8(): Int = get().toUnsigned()
-private fun ByteBuffer.int8(): Int = get().toInt()
-
-private fun ByteBuffer.uint32(i: Int): Long = getInt(i).toUnsigned()
-private fun ByteBuffer.int32(i: Int): Int = getInt(i)
-private fun ByteBuffer.uint16(i: Int): Int = getShort(i).toUnsigned()
-private fun ByteBuffer.int16(i: Int): Int = getShort(i).toInt()
-private fun ByteBuffer.uint8(i: Int): Int = get(i).toUnsigned()
-private fun ByteBuffer.int8(i: Int): Int = get(i).toInt()
-
-private fun ShortBuffer.uint16(): Int = get().toUnsigned()
-private fun ShortBuffer.intt16(): Int = get().toInt()
-
-// We are not supporting over 2GB font files. Just cast to Int.
-private fun ByteBuffer.position(i: Long) = position(i.toInt())
-
-private const val SFNT_VERSION_1_0 = 0x0001_0000L
-private const val SFNT_TAG_OTTO = 0x4F_54_54_4FL
-
-private const val TAG_ttcf = 0x74_74_63_66L
-private const val TAG_OS_2 = 0x4F_53_2F_32L
-private const val TAG_cmap = 0x63_6D_61_70L
-private const val TAG_name = 0x6E_61_6D_65L
 
 class OpenTypeParser(fontBuffer: ByteBuffer, val index: Int = 0) {
 

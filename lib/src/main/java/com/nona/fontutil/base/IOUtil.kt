@@ -31,19 +31,18 @@ object IOUtil {
     }
 
     fun mmap(file: File, offset: Long = 0, length: Long? = null): ByteBuffer {
-        val realLength = length ?: file.length()
         return FileInputStream(file).use {
-            it.channel.map(FileChannel.MapMode.READ_ONLY, offset, realLength)
+            it.channel.map(FileChannel.MapMode.READ_ONLY, offset, length ?: it.channel.size())
         }?: throw IOException("Failed to mmap $file")
     }
 
-    fun mmap(resolver: ContentResolver, uri: Uri): ByteBuffer? {
+    fun mmap(resolver: ContentResolver, uri: Uri): ByteBuffer {
         return resolver.openFileDescriptor(uri, "r", null)?.use { pfd ->
             FileInputStream(pfd.fileDescriptor).use { fis ->
                 val channel = fis.channel
                 val size = channel.size()
                 channel.map(FileChannel.MapMode.READ_ONLY, 0, size)
             }
-        }
+        } ?: throw IOException("Failed to mmap $uri")
     }
 }
