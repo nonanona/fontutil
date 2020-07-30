@@ -9,6 +9,7 @@ import android.os.Build
 import android.os.Bundle
 import android.util.AttributeSet
 import android.util.Log
+import android.view.MotionEvent
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.nona.fontutil.core.otparser.Glyph
@@ -39,6 +40,12 @@ class PathDrawView : View {
         }
         get() = field
 
+    val anim = ValueAnimator.ofFloat(0f, 1f).apply {
+        setDuration(2000)
+        addUpdateListener {
+            progress = it.getAnimatedValue() as Float
+        }
+    }
     val textSize = 1000f
     var path: Path
     val paint = Paint().apply {
@@ -84,8 +91,10 @@ class PathDrawView : View {
                    strokeWidth = 10f
             })
 
-            if (progress == 1f) {
-                canvas.drawPath(path, fillPaint)
+            if (progress >= 0.8) {
+                canvas.drawPath(path, fillPaint.apply {
+                    alpha = (((progress - 0.8f) / 0.2) * 255f).toInt()
+                })
             }
 
             glyph?.let{
@@ -107,6 +116,10 @@ class PathDrawView : View {
         }
     }
 
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        anim.start()
+        return super.onTouchEvent(event)
+    }
 }
 
 class PathExtractorActivity : AppCompatActivity() {
@@ -115,11 +128,6 @@ class PathExtractorActivity : AppCompatActivity() {
         val view = PathDrawView(this)
         setContentView(view)
 
-        val anim = ValueAnimator.ofFloat(0f, 1f)
-        anim.setDuration(2000)
-        anim.addUpdateListener {
-            view.progress = it.getAnimatedValue() as Float
-        }
-        anim.start()
+
     }
 }
