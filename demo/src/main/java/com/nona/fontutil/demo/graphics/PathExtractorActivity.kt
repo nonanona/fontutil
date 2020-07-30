@@ -33,31 +33,45 @@ class PathDrawView : View {
 
     var progress: Float = 0f
         set(value) {
+            updateRenderPath(progress)
             invalidate()
             field = value
         }
         get() = field
 
     val textSize = 1000f
-    var path: Path? = null
+    var path: Path
     val paint = Paint().apply {
         color = Color.GRAY
         style = Paint.Style.STROKE
+    }
+    val fillPaint = Paint().apply {
+        shader = LinearGradient(0f, 0f, 100f, 100f, Color.RED, Color.BLUE, Shader.TileMode.MIRROR)
     }
     var glyph: OutlineGlyph? = null
     val onCurvePaint = Paint().apply { color = Color.RED }
     val offCurvePaint = Paint().apply { color = Color.BLUE }
 
+    val pathMeasure = PathMeasure()
+    var renderPath: Path = Path()
     init {
         //val ot = OpenType(context.assets, "kosugi-maru/KosugiMaru-Regular.ttf", 1)
-        val ot = OpenType(File("/system/fonts/NotoSansCJK-Regular.ttc"), 1)
+        val ot = OpenType(File("/system/fonts/NotoSerifCJK-Regular.ttc"), 1)
         val glyphId = ot.getGlyphId('鬱'.toInt())
         path = ot.getGlyphPath(glyphId, textSize)
-        glyph = ot.getGlyph(glyphId) as OutlineGlyph
+        //glyph = ot.getGlyph(glyphId) as OutlineGlyph
     }
 
-    val grad = LinearGradient(0f, 0f, 100f, 100f, Color.RED, Color.BLUE, Shader.TileMode.MIRROR)
-
+    fun updateRenderPath(progress: Float) {
+        pathMeasure.setPath(path, true)
+        renderPath.reset()
+        val tmp = Path()
+        do {
+            val end = pathMeasure.length * progress
+            pathMeasure.getSegment(0f, end, tmp, true)
+            renderPath.addPath(tmp)
+        } while (pathMeasure.nextContour())
+    }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
@@ -66,11 +80,12 @@ class PathDrawView : View {
         try {
             canvas.translate(0f, canvas.height * 2f / 3f)
 
-            path?.let {
-                canvas.drawPath(it, paint.apply {
-                    strokeWidth = 5f + 20f * progress
-                    setShader(grad)
-                })
+            canvas.drawPath(renderPath, paint.apply {
+                   strokeWidth = 10f
+            })
+
+            if (progress == 1f) {
+                canvas.drawPath(path, fillPaint)
             }
 
             glyph?.let{
@@ -100,16 +115,11 @@ class PathExtractorActivity : AppCompatActivity() {
         val view = PathDrawView(this)
         setContentView(view)
 
-        /*
         val anim = ValueAnimator.ofFloat(0f, 1f)
-        anim.setDuration(500)
+        anim.setDuration(2000)
         anim.addUpdateListener {
             view.progress = it.getAnimatedValue() as Float
         }
-        anim.repeatMode = ValueAnimator.REVERSE
-        anim.repeatCount = 1000
         anim.start()
-
-         */
     }
 }
