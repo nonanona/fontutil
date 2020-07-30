@@ -6,7 +6,9 @@ enum class OutlineType {
 }
 
 sealed class Glyph(
-    val unitPerEm: Int
+    val unitPerEm: Int,
+    val advance: Int,
+    val lsb: Int
 )
 
 class Contour(internal val points: List<Long>) {
@@ -32,8 +34,10 @@ class Contour(internal val points: List<Long>) {
 class OutlineGlyph(
     val type: OutlineType,
     val contours: List<Contour>,
-    unitPerEm: Int
-) : Glyph(unitPerEm)
+    unitPerEm: Int,
+    advance: Int,
+    lsb: Int
+) : Glyph(unitPerEm, advance, lsb)
 
 internal fun setXPos(packed: Long, x: Int) =
     (packed and 0xFF_0000_FFFFL) or ((x.toLong() and 0xFFFFL) shl 16)

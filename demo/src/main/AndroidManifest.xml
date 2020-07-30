@@ -49,7 +49,15 @@
         </activity>
 
         <activity android:name=".graphics.PathExtractorActivity"
-            android:label="Path Extractor Example">
+            android:label="graphics/Path Extractor Example">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.nona.fontutil.demos.SAMPLE_CODE" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".graphics.PathAnimationActivity"
+            android:label="graphics/Path Animation Example">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="com.nona.fontutil.demos.SAMPLE_CODE" />

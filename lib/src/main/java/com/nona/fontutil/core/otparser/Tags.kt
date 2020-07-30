@@ -12,6 +12,8 @@ const val TAG_head = 0x68_65_61_64L
 const val TAG_maxp = 0x6D_61_78_70L
 const val TAG_glyf = 0x67_6C_79_66L
 const val TAG_CFF  = 0x43_46_46_20L
+const val TAG_hmtx = 0x68_6D_74_78L
+const val TAG_hhea = 0x68_68_65_61L
 
 fun Long.toTagName(): String{
     val chars = CharArray(4)

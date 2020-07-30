@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.nona.fontutil.core.otparser.Glyph
 import com.nona.fontutil.core.otparser.OutlineGlyph
 import com.nona.fontutil.graphics.OpenType
+import com.nona.fontutil.graphics.toPath
 import java.io.File
 
 class PathDrawView : View {
@@ -32,93 +33,43 @@ class PathDrawView : View {
         defStyleRes: Int
     ) : super(context, attrs, defStyleAttr, defStyleRes)
 
-    var progress: Float = 0f
-        set(value) {
-            updateRenderPath(progress)
-            invalidate()
-            field = value
-        }
-        get() = field
-
-    val anim = ValueAnimator.ofFloat(0f, 1f).apply {
-        setDuration(2000)
-        addUpdateListener {
-            progress = it.getAnimatedValue() as Float
-        }
-    }
     val textSize = 1000f
-    var path: Path
     val paint = Paint().apply {
         color = Color.GRAY
         style = Paint.Style.STROKE
+        strokeWidth = 10f
     }
-    val fillPaint = Paint().apply {
-        shader = LinearGradient(0f, 0f, 100f, 100f, Color.RED, Color.BLUE, Shader.TileMode.MIRROR)
-    }
-    var glyph: OutlineGlyph? = null
     val onCurvePaint = Paint().apply { color = Color.RED }
     val offCurvePaint = Paint().apply { color = Color.BLUE }
 
-    val pathMeasure = PathMeasure()
-    var renderPath: Path = Path()
-    init {
-        //val ot = OpenType(context.assets, "kosugi-maru/KosugiMaru-Regular.ttf", 1)
-        val ot = OpenType(File("/system/fonts/NotoSerifCJK-Regular.ttc"), 1)
-        val glyphId = ot.getGlyphId('鬱'.toInt())
-        path = ot.getGlyphPath(glyphId, textSize)
-        //glyph = ot.getGlyph(glyphId) as OutlineGlyph
-    }
-
-    fun updateRenderPath(progress: Float) {
-        pathMeasure.setPath(path, true)
-        renderPath.reset()
-        val tmp = Path()
-        do {
-            val end = pathMeasure.length * progress
-            pathMeasure.getSegment(0f, end, tmp, true)
-            renderPath.addPath(tmp)
-        } while (pathMeasure.nextContour())
-    }
+    val font = OpenType(File("/system/fonts/NotoSansCJK-Regular.ttc"), 1)
+    val glyph = font.getGlyph(font.getGlyphId('ぬ'.toInt())) as OutlineGlyph
+    val path = glyph.toPath(textSize)
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
+
         canvas.save()
         try {
-            canvas.translate(0f, canvas.height * 2f / 3f)
+            val scale = textSize / font.head.unitsPerEm
+            canvas.translate(0f, font.hhea.ascent * scale) // baseline
 
-            canvas.drawPath(renderPath, paint.apply {
-                   strokeWidth = 10f
-            })
+            canvas.drawPath(path, paint)
 
-            if (progress >= 0.8) {
-                canvas.drawPath(path, fillPaint.apply {
-                    alpha = (((progress - 0.8f) / 0.2) * 255f).toInt()
-                })
-            }
-
-            glyph?.let{
-                val scale = textSize / it.unitPerEm
-                it.contours.forEach { contour ->
-                    contour.forEach { x, y, onCurve ->
-                        canvas.drawCircle(
-                            x * scale,
-                            -y * scale,
-                            8f,
-                            if (onCurve) onCurvePaint else offCurvePaint
-                        )
-                    }
+            glyph.contours.forEach { contour ->
+                contour.forEach { x, y, onCurve ->
+                    canvas.drawCircle(
+                        x * scale,
+                        -y * scale,
+                        8f,
+                        if (onCurve) onCurvePaint else offCurvePaint
+                    )
                 }
             }
-
         } finally {
             canvas.restore()
         }
-    }
-
-    override fun onTouchEvent(event: MotionEvent?): Boolean {
-        anim.start()
-        return super.onTouchEvent(event)
     }
 }
 

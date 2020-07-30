@@ -8,7 +8,7 @@ import java.nio.ByteBuffer
 
 object GlyfParser {
 
-    fun getGlyph(buffer: ByteBuffer, glyphOffset: Long, unitPerEm: Int): Glyph {
+    fun getOutline(buffer: ByteBuffer, glyphOffset: Long): List<Contour> {
         buffer.position(glyphOffset)
         val numberOfContents = buffer.int16()
         if (numberOfContents < 0) return getCompositeGlyph(buffer)
@@ -88,14 +88,10 @@ object GlyfParser {
             res
         }
 
-        return OutlineGlyph(
-            type = OutlineType.QUADRATIC_BEZIER_CURVE,
-            contours = contours,
-            unitPerEm = unitPerEm)
-
+        return contours
     }
 
-    private fun getCompositeGlyph(buffer: ByteBuffer): Glyph {
+    private fun getCompositeGlyph(buffer: ByteBuffer): List<Contour> {
         TODO("Composite Glyph is not yet implemented")
     }
 }

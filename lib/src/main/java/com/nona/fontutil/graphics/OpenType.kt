@@ -24,8 +24,9 @@ class OpenType(buffer: ByteBuffer, val index: Int) {
     }
 
     private val tables = OpenTypeParser2.getTableOffsets(fontBuffer, index)
-    private val head = HeadParser.getHead(fontBuffer, getTableOffset(TAG_head))
-    private val maxp = MaxpParser.getMaxProfile(fontBuffer, getTableOffset(TAG_maxp))
+    val head = HeadParser.getHead(fontBuffer, getTableOffset(TAG_head))
+    val maxp = MaxpParser.getMaxProfile(fontBuffer, getTableOffset(TAG_maxp))
+    val hhea = HheaParser.getMetrix(fontBuffer, getTableOffset(TAG_hhea))
     private val cmapOffset: Long
     private val cff: CFFMetadata?
 
@@ -38,7 +39,6 @@ class OpenType(buffer: ByteBuffer, val index: Int) {
         cff = tables.get(TAG_CFF)?.let { cffOffset ->
             CFFParser.getMetadata(fontBuffer, cffOffset)
         }
-
     }
 
     fun getTableOffset(tag: Long) =
@@ -47,6 +47,12 @@ class OpenType(buffer: ByteBuffer, val index: Int) {
     fun getGlyphId(cp: Int) = CMapParser.getGlyphId(fontBuffer, cmapOffset, cp)
 
     fun getGlyph(glyphId: Int):Glyph {
+        val (advance, lsb) = HmtxParser.getMetrix(
+            fontBuffer,
+            getTableOffset(TAG_hmtx),
+            hhea.numberOfHMetrics,
+            glyphId
+        )
         if (cff == null) { // TrueType font. Use loca/glyf table
             val glyphOffset = LocaParser.getGlyphOffset(
                 buffer = fontBuffer,
@@ -56,18 +62,38 @@ class OpenType(buffer: ByteBuffer, val index: Int) {
                 glyphId = glyphId
             )
 
-            return GlyfParser.getGlyph(
-                fontBuffer,
-                getTableOffset(TAG_glyf) + glyphOffset,
-                head.unitsPerEm
+            return OutlineGlyph(
+                type = OutlineType.QUADRATIC_BEZIER_CURVE,
+                contours = GlyfParser.getOutline(
+                    fontBuffer,
+                    getTableOffset(TAG_glyf) + glyphOffset
+                ),
+                unitPerEm = head.unitsPerEm,
+                advance = advance,
+                lsb = lsb
             )
         } else { // CFF font
-            return CFFParser.getGlyph(fontBuffer, glyphId, cff, head.unitsPerEm)
+            return OutlineGlyph(
+                type = OutlineType.CUBIC_BEZIER_CURVE,
+                contours = CFFParser.getOutline(fontBuffer, glyphId, cff),
+                unitPerEm = head.unitsPerEm,
+                advance = advance,
+                lsb = lsb
+            )
         }
     }
 
-    fun getGlyphPath(glyphId: Int, textSize: Float): Path {
-        return getGlyph(glyphId).toPath(unitPerEm = head.unitsPerEm, textSize = textSize)
+    fun shapeText(str: String): List<Glyph> {
+        var i = 0
+        val glyphIds = mutableListOf<Int>()
+        while (i < str.length) {
+            val cp = str.codePointAt(i)
+            i += Character.charCount(cp)
+            glyphIds.add(getGlyphId(cp))
+        }
+        // TODO: GSUB process
+        return glyphIds.map {
+            getGlyph(it)
+        }
     }
-
 }

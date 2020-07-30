@@ -7,9 +7,9 @@ import com.nona.fontutil.core.otparser.Glyph
 import com.nona.fontutil.core.otparser.OutlineGlyph
 import com.nona.fontutil.core.otparser.OutlineType
 
-internal fun Glyph.toPath(unitPerEm: Int, textSize: Float): Path {
+fun Glyph.toPath(textSize: Float): Path {
     return when (this) {
-        is OutlineGlyph -> OutlineGlyphToPath(this, unitPerEm, textSize)
+        is OutlineGlyph -> OutlineGlyphToPath(this, textSize)
         else -> TODO("Not yet implemented")
     }
 }
@@ -89,9 +89,9 @@ private fun cubicBezierParser(
     }
 }
 
-private fun OutlineGlyphToPath(glyph: OutlineGlyph, unitPerEm: Int, textSize: Float): Path {
+private fun OutlineGlyphToPath(glyph: OutlineGlyph, textSize: Float): Path {
     val res = Path()
-    val scale = textSize / unitPerEm
+    val scale = textSize / glyph.unitPerEm
     if (glyph.type == OutlineType.QUADRATIC_BEZIER_CURVE) {
         glyph.contours.forEach { contour ->
             val path = Path()

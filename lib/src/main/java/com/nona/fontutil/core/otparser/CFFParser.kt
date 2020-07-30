@@ -243,13 +243,8 @@ object CFFParser {
         )
     }
 
-    fun getGlyph(buffer: ByteBuffer, glyphId: Int, cff: CFFMetadata, unitPerEm: Int): Glyph {
+    fun getOutline(buffer: ByteBuffer, glyphId: Int, cff: CFFMetadata): List<Contour> {
         val fd = getFDMetadata(buffer, cff, glyphId)
-        val list = execCharString(buffer, cff, fd, glyphId)
-        return OutlineGlyph(
-            type = OutlineType.CUBIC_BEZIER_CURVE,
-            contours = list,
-            unitPerEm = unitPerEm
-        )
+        return execCharString(buffer, cff, fd, glyphId)
     }
 }
