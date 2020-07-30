@@ -6,9 +6,11 @@ import com.nona.fontutil.base.IOUtil
 import com.nona.fontutil.graphics.OpenType
 import com.nona.fontutil.test.TestUtil
 import org.junit.Test
+import java.io.File
 
 private const val ROBOTO_DIR_PREFIX = "roboto-fonts"
 private const val MANSALVA_DIR_PREFIX = "mansalva"
+private const val NOTO_CJK_DIR_PREFIX = "noto-cjk"
 
 class OpenTypeParserTest {
     val robotoFontsStyles = mapOf(
@@ -152,14 +154,15 @@ class OpenTypeParserTest {
 
     @Test
     fun `getGlyphId`() {
-        val fontFile = TestUtil.getThirdPartyFile("$ROBOTO_DIR_PREFIX/Roboto-Regular.ttf")
+        //val fontFile = TestUtil.getThirdPartyFile("$NOTO_CJK_DIR_PREFIX/NotoSerifCJK-Regular.ttc")
+        val fontFile = File("/home/nona/NotoSansCJK-Regular.ttc")
 
         assertWithMessage("File must exists: ${fontFile.absolutePath}")
             .that(fontFile.exists())
             .isTrue()
 
-        val ot = OpenType(fontFile)
-        val r = ot.getGlyphId('a'.toInt())
+        val ot = OpenType(fontFile, 1)
+        val r = ot.getGlyphId('E'.toInt())
         ot.getGlyph(r)
     }
 }

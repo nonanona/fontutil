@@ -14,6 +14,13 @@ inline fun ByteBuffer.int16(): Int = short.toInt()
 inline fun ByteBuffer.uint8(): Int = get().toUnsigned()
 inline fun ByteBuffer.int8(): Int = get().toInt()
 
+fun ByteBuffer.uint24(): Int {
+    val b0 = uint8()
+    val b1 = uint8()
+    val b2 = uint8()
+    return (b0 shl 16) or (b1 shl 8) or b2
+}
+
 inline fun ByteBuffer.uint32(i: Int): Long = getInt(i).toUnsigned()
 inline fun ByteBuffer.int32(i: Int): Int = getInt(i)
 inline fun ByteBuffer.uint16(i: Int): Int = getShort(i).toUnsigned()

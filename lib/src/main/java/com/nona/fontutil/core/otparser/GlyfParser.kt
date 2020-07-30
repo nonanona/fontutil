@@ -6,60 +6,6 @@ import com.nona.fontutil.base.position
 import com.nona.fontutil.base.uint8
 import java.nio.ByteBuffer
 
-sealed class Glyph(
-    val unitPerEm: Int,
-    val xMin: Int,
-    val yMin: Int,
-    val xMax: Int,
-    val yMax: Int
-)
-
-class Contour(private val points: List<Long>) {
-    val size: Int get() = points.size
-
-    fun getXCoord(i: Int): Int = xPos(points[i])
-    fun getYCoord(i: Int): Int = yPos(points[i])
-    fun isOnCoord(i: Int): Boolean = onCurvePoint(points[i])
-
-    fun forEach(f: (Int, Int, Boolean) -> Unit) {
-        points.forEach {
-            f(xPos(it), yPos(it), onCurvePoint(it))
-        }
-    }
-
-    fun forEachIndexed(f: (Int, Int, Int, Boolean) -> Unit) {
-        points.forEachIndexed { index, it ->
-            f(index, xPos(it), yPos(it), onCurvePoint(it))
-        }
-    }
-}
-
-class OutlineGlyph(
-    val contours: List<Contour>,
-    unitPerEm: Int,
-    xMin: Int,
-    yMin: Int,
-    xMax: Int,
-    yMax: Int
-) : Glyph(unitPerEm, xMin, yMin, xMax, yMax)
-
-private fun setXPos(packed: Long, x: Int) =
-    (packed and 0xFF_0000_FFFFL) or ((x.toLong() and 0xFFFFL) shl 16)
-private fun setYPos(packed: Long, y: Int) =
-    (packed and 0xFF_FFFF_0000L) or (y.toLong() and 0xFFFFL)
-private fun setFlag(packed: Long, flag: Int) =
-    (packed and 0x00_FFFF_FFFFL) or (flag.toLong() shl 32)
-
-private fun xPos(packed: Long) = ((packed and 0xFFFF_0000L) shr 16).toShort().toInt()
-private fun yPos(packed: Long) = ((packed and 0x0000_FFFFL)).toShort().toInt()
-private fun onCurvePoint(packed: Long) = (packed and 0x01_0000_0000L) == 0x01_0000_0000L
-private fun xShortVector(packed: Long) = (packed and 0x02_0000_0000L) == 0x02_0000_0000L
-private fun yShortVector(packed: Long) = (packed and 0x04_0000_0000L) == 0x04_0000_0000L
-private fun xIsSameOrPositiveXShortVector(packed: Long) =
-    (packed and 0x10_0000_0000L) == 0x10_0000_0000L
-private fun yIsSameOrPositiveYShortVector(packed: Long) =
-    (packed and 0x20_0000_0000L) == 0x20_0000_0000L
-
 object GlyfParser {
 
     fun getGlyph(buffer: ByteBuffer, glyphOffset: Long, unitPerEm: Int): Glyph {
@@ -67,10 +13,10 @@ object GlyfParser {
         val numberOfContents = buffer.int16()
         if (numberOfContents < 0) return getCompositeGlyph(buffer)
 
-        val xMin = buffer.int16()
-        val yMin = buffer.int16()
-        val xMax = buffer.int16()
-        val yMax = buffer.int16()
+        buffer.int16()
+        buffer.int16()
+        buffer.int16()
+        buffer.int16()
 
         val endPtsOfContours = IntArray(numberOfContents)
         for (i in 0 until numberOfContents) {
@@ -143,12 +89,9 @@ object GlyfParser {
         }
 
         return OutlineGlyph(
+            type = OutlineType.QUADRATIC_BEZIER_CURVE,
             contours = contours,
-            unitPerEm = unitPerEm,
-            xMin = xMin,
-            yMin = yMin,
-            xMax = xMax,
-            yMax = yMax)
+            unitPerEm = unitPerEm)
 
     }
 

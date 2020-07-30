@@ -27,12 +27,18 @@ class OpenType(buffer: ByteBuffer, val index: Int) {
     private val head = HeadParser.getHead(fontBuffer, getTableOffset(TAG_head))
     private val maxp = MaxpParser.getMaxProfile(fontBuffer, getTableOffset(TAG_maxp))
     private val cmapOffset: Long
+    private val cff: CFFMetadata?
 
     init {
         val cmapTableOffset = getTableOffset(TAG_cmap)
         val cmapSubOffset = CMapParser.getPreferredCmapOffset(fontBuffer, cmapTableOffset)
         if (cmapSubOffset == 0L) throw RuntimeException("Supported cmap table not found")
         cmapOffset = cmapSubOffset + cmapTableOffset
+
+        cff = tables.get(TAG_CFF)?.let { cffOffset ->
+            CFFParser.getMetadata(fontBuffer, cffOffset)
+        }
+
     }
 
     fun getTableOffset(tag: Long) =
@@ -41,15 +47,23 @@ class OpenType(buffer: ByteBuffer, val index: Int) {
     fun getGlyphId(cp: Int) = CMapParser.getGlyphId(fontBuffer, cmapOffset, cp)
 
     fun getGlyph(glyphId: Int):Glyph {
-        val glyphOffset = LocaParser.getGlyphOffset(
-            buffer = fontBuffer,
-            locaOffset = getTableOffset(TAG_loca),
-            locaType = head.indexToLocFormat,
-            maxGlyph = maxp.numGlyph,
-            glyphId = glyphId
-        )
+        if (cff == null) { // TrueType font. Use loca/glyf table
+            val glyphOffset = LocaParser.getGlyphOffset(
+                buffer = fontBuffer,
+                locaOffset = getTableOffset(TAG_loca),
+                locaType = head.indexToLocFormat,
+                maxGlyph = maxp.numGlyph,
+                glyphId = glyphId
+            )
 
-        return GlyfParser.getGlyph(fontBuffer, getTableOffset(TAG_glyf) + glyphOffset, head.unitsPerEm)
+            return GlyfParser.getGlyph(
+                fontBuffer,
+                getTableOffset(TAG_glyf) + glyphOffset,
+                head.unitsPerEm
+            )
+        } else { // CFF font
+            return CFFParser.getGlyph(fontBuffer, glyphId, cff, head.unitsPerEm)
+        }
     }
 
     fun getGlyphPath(glyphId: Int, textSize: Float): Path {

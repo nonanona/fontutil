@@ -49,13 +49,15 @@ class PathDrawView : View {
     val offCurvePaint = Paint().apply { color = Color.BLUE }
 
     init {
-        val ot = OpenType(context.assets, "kosugi-maru/KosugiMaru-Regular.ttf", 1)
+        //val ot = OpenType(context.assets, "kosugi-maru/KosugiMaru-Regular.ttf", 1)
+        val ot = OpenType(File("/system/fonts/NotoSansCJK-Regular.ttc"), 1)
         val glyphId = ot.getGlyphId('鬱'.toInt())
         path = ot.getGlyphPath(glyphId, textSize)
-        //glyph = ot.getGlyph(glyphId) as OutlineGlyph
+        glyph = ot.getGlyph(glyphId) as OutlineGlyph
     }
 
-    val grad = LinearGradient(0f, 0f, 100f, 100f, Color.GREEN, Color.BLUE, Shader.TileMode.MIRROR)
+    val grad = LinearGradient(0f, 0f, 100f, 100f, Color.RED, Color.BLUE, Shader.TileMode.MIRROR)
+
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
@@ -98,13 +100,16 @@ class PathExtractorActivity : AppCompatActivity() {
         val view = PathDrawView(this)
         setContentView(view)
 
+        /*
         val anim = ValueAnimator.ofFloat(0f, 1f)
-        anim.setDuration(3000)
+        anim.setDuration(500)
         anim.addUpdateListener {
             view.progress = it.getAnimatedValue() as Float
         }
         anim.repeatMode = ValueAnimator.REVERSE
         anim.repeatCount = 1000
         anim.start()
+
+         */
     }
 }
